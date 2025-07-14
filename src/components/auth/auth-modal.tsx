@@ -32,7 +32,15 @@ export default function AuthModal() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [open, setOpen] = useState(false);
   const { toast } = useToast();
+
+  const handleAuthSuccess = () => {
+    setEmail('');
+    setPassword('');
+    setError('');
+    setOpen(false);
+  }
 
   const handleAuthError = (errorMessage: string) => {
     setError(errorMessage);
@@ -43,23 +51,22 @@ export default function AuthModal() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
-      // Check if user document exists in Firestore, create if not
       const userRef = doc(firestore, 'users', user.uid);
       const docSnap = await getDoc(userRef);
 
       if (!docSnap.exists()) {
         await setDoc(userRef, {
           uid: user.uid,
-          email: user.email, // Email might be null for some providers
-          membershipTier: 'none', // Default tier
-          isActive: false, // Default status
+          email: user.email, 
+          membershipTier: 'none',
+          isActive: false, 
         });
       }
       toast({
         title: 'Login Successful',
         description: 'Welcome back! You have been logged in.',
       });
-      setError('');
+      handleAuthSuccess();
     } catch (error: any) {
       handleAuthError(error.message);
     }
@@ -70,10 +77,7 @@ export default function AuthModal() {
     handleSocialLogin(provider);
   };
 
-  // You can add similar handlers for other providers like Facebook and GitHub
-
   const SocialButtons = () => (
-    // ... existing SocialButtons component
     <>
       <div className="relative my-4">
         <div className="absolute inset-0 flex items-center">
@@ -103,18 +107,17 @@ export default function AuthModal() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Create user document in Firestore
       await setDoc(doc(firestore, 'users', user.uid), {
         uid: user.uid,
         email: user.email,
-        membershipTier: 'none', // Default tier
-        isActive: false, // Default status
+        membershipTier: 'none',
+        isActive: false,
       });
       toast({
         title: 'Sign Up Successful',
         description: 'Welcome! Your account has been created.',
       });
-      setError('');
+      handleAuthSuccess();
     } catch (error: any) {
       handleAuthError(error.message);
     }
@@ -127,14 +130,14 @@ export default function AuthModal() {
         title: 'Login Successful',
         description: 'Welcome back! You have been logged in.',
       });
-      setError('');
+      handleAuthSuccess();
     } catch (error: any) {
       handleAuthError(error.message);
     }
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>Login / Sign Up</Button>
       </DialogTrigger>
