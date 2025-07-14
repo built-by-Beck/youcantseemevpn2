@@ -1,19 +1,28 @@
+'use client';
+
 import DashboardClient from '@/components/dashboard/dashboard-client';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
-  if (loading) {
-    return <p>Loading...</p>;
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/');
+    }
+  }, [user, loading, router]);
+
+  if (loading || !user) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p>Loading...</p>
+      </div>
+    );
   }
 
-  if (!user) {
-    router.push('/');
-    return null; // Prevent rendering the dashboard content before redirect
-  }
   return (
     <div className="container mx-auto py-8 px-4 max-w-7xl">
       <div className="text-center mb-12">
