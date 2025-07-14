@@ -3,6 +3,7 @@ import './globals.css';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
 import Header from '@/components/layout/header';
+import { AuthProvider } from '@/context/AuthContext';
 
 export const metadata: Metadata = {
   title: 'YouCantSeeMeVPN',
@@ -28,14 +29,16 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body
-        className={cn(
-          'min-h-screen bg-background font-body antialiased'
-        )}
-      >
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Toaster />
+      <body>
+        <AuthProvider>
+          <div
+            className={cn('min-h-screen bg-background font-body antialiased')}
+          >
+            <Header />
+            <main className="flex-1">{children}</main>
+            <Toaster />
+          </div>
+        </AuthProvider>
       </body>
     </html>
   );

@@ -1,6 +1,19 @@
 import DashboardClient from '@/components/dashboard/dashboard-client';
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 
 export default function DashboardPage() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
+  if (!user) {
+    router.push('/');
+    return null; // Prevent rendering the dashboard content before redirect
+  }
   return (
     <div className="container mx-auto py-8 px-4 max-w-7xl">
       <div className="text-center mb-12">
