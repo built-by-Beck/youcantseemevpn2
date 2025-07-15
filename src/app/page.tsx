@@ -8,7 +8,7 @@ import type { Plan, PlanName } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useAuthModal } from '@/components/auth/auth-modal';
-import { createCheckoutSession } from '@/ai/flows/create-checkout-session';
+import { createCheckoutSession } from '@/app/actions/stripe';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
