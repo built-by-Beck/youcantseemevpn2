@@ -11,10 +11,13 @@ import { Button } from '@/components/ui/button';
 import { Check, ArrowRight, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { loadStripe } from '@stripe/stripe-js';
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 interface PricingCardProps {
   plan: Plan;
-  onChoosePlan: () => void;
+  onChoosePlan: (planId: string) => Promise<void>; // Modified to accept planId and return a Promise
   isLoading?: boolean;
 }
 
@@ -59,7 +62,7 @@ export default function PricingCard({
       <CardFooter>
         <Button
           className="w-full group"
-          onClick={onChoosePlan}
+          onClick={() => onChoosePlan(plan.id)} // Pass the plan ID to onChoosePlan
           disabled={isLoading}
         >
           {isLoading ? (
