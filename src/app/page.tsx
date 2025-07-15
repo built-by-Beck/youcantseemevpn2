@@ -1,12 +1,19 @@
+'use client';
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import PricingCard from '@/components/pricing-card';
 import { ArrowRight, ShieldCheck, Star, Users } from 'lucide-react';
-import type { Plan } from '@/types';
+import type { Plan, PlanName } from '@/types';
+import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/hooks/use-toast';
+import { doc, updateDoc } from 'firebase/firestore';
+import { firestore } from '@/lib/firebase';
+import { useAuthModal } from '@/components/auth/auth-modal';
 
-const plans: Plan[] = [
+const plans: Omit<Plan, 'name'>[] = [
   {
-    name: 'Basic',
+    tier: 'basic',
     price: '$5.99',
     pricePeriod: '/month',
     description: 'Get started with essential privacy features.',
@@ -20,7 +27,7 @@ const plans: Plan[] = [
     cta: 'Choose Basic',
   },
   {
-    name: 'Pro',
+    tier: 'pro',
     price: '$14.99',
     pricePeriod: '/month',
     description: 'For power users who need more.',
@@ -35,7 +42,7 @@ const plans: Plan[] = [
     popular: true,
   },
   {
-    name: 'Family',
+    tier: 'family',
     price: '$29.99',
     pricePeriod: '/month',
     description: 'Protect your entire family online.',
@@ -51,6 +58,32 @@ const plans: Plan[] = [
 ];
 
 export default function Home() {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const { setOpen } = useAuthModal();
+
+  const handleChoosePlan = async (plan: PlanName) => {
+    if (!user) {
+      setOpen(true);
+      return;
+    }
+
+    try {
+      const userRef = doc(firestore, 'users', user.uid);
+      await updateDoc(userRef, { membershipTier: plan });
+      toast({
+        title: 'Plan Updated!',
+        description: `You are now on the ${plan} plan.`,
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Could not update your plan. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-5rem)] p-4 md:p-8">
       <div className="text-center max-w-4xl mx-auto">
@@ -68,7 +101,11 @@ export default function Home() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12 w-full max-w-6xl">
         {plans.map((plan) => (
-          <PricingCard key={plan.name} plan={plan} />
+          <PricingCard
+            key={plan.tier}
+            plan={{ ...plan, name: plan.tier }}
+            onChoosePlan={() => handleChoosePlan(plan.tier)}
+          />
         ))}
       </div>
 

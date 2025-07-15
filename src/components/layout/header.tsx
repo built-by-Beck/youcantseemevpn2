@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import AuthModal from '@/components/auth/auth-modal';
+import { useAuthModal } from '@/components/auth/auth-modal';
 import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
 import { Shield, LogOut } from 'lucide-react';
@@ -18,6 +18,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
+function AuthButton() {
+  const { setOpen } = useAuthModal();
+  return <Button onClick={() => setOpen(true)}>Login / Sign Up</Button>;
+}
 
 export default function Header() {
   const pathname = usePathname();
@@ -92,7 +97,10 @@ export default function Header() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={user.photoURL ?? ''} alt={user.email ?? ''} />
+                    <AvatarImage
+                      src={user.photoURL ?? ''}
+                      alt={user.email ?? ''}
+                    />
                     <AvatarFallback>{getInitials(user.email)}</AvatarFallback>
                   </Avatar>
                 </Button>
@@ -116,7 +124,7 @@ export default function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <AuthModal />
+            <AuthButton />
           )}
         </div>
       </div>

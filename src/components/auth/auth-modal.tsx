@@ -26,13 +26,39 @@ import {
   signInWithEmailAndPassword,
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { useState } from 'react';
+import { useState, createContext, useContext, ReactNode } from 'react';
 
-export default function AuthModal() {
+interface AuthModalContextType {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+}
+
+const AuthModalContext = createContext<AuthModalContextType | undefined>(undefined);
+
+export const AuthModalProvider = ({ children }: { children: ReactNode }) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <AuthModalContext.Provider value={{ open, setOpen }}>
+      {children}
+      <AuthModal />
+    </AuthModalContext.Provider>
+  )
+}
+
+export const useAuthModal = () => {
+  const context = useContext(AuthModalContext);
+  if (context === undefined) {
+    throw new Error('useAuthModal must be used within an AuthModalProvider');
+  }
+  return context;
+};
+
+
+function AuthModal() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [open, setOpen] = useState(false);
+  const { open, setOpen } = useAuthModal();
   const { toast } = useToast();
 
   const handleAuthSuccess = () => {
@@ -138,9 +164,6 @@ export default function AuthModal() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>Login / Sign Up</Button>
-      </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Welcome Back</DialogTitle>

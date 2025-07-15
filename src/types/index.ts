@@ -2,6 +2,7 @@ export type PlanName = 'basic' | 'pro' | 'family' | 'none';
 
 export interface Plan {
   name: string;
+  tier: PlanName;
   price: string;
   pricePeriod: string;
   description: string;

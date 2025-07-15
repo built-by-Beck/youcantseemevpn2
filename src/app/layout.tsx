@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
 import Header from '@/components/layout/header';
 import { AuthProvider } from '@/context/AuthContext';
+import { AuthModalProvider } from '@/components/auth/auth-modal';
 
 export const metadata: Metadata = {
   title: 'YouCantSeeMeVPN',
@@ -31,13 +32,15 @@ export default function RootLayout({
       </head>
       <body>
         <AuthProvider>
-          <div
-            className={cn('min-h-screen bg-background font-body antialiased')}
-          >
-            <Header />
-            <main className="flex-1">{children}</main>
-            <Toaster />
-          </div>
+          <AuthModalProvider>
+            <div
+              className={cn('min-h-screen bg-background font-body antialiased')}
+            >
+              <Header />
+              <main className="flex-1">{children}</main>
+              <Toaster />
+            </div>
+          </AuthModalProvider>
         </AuthProvider>
       </body>
     </html>

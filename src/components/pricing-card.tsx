@@ -14,9 +14,10 @@ import { cn } from '@/lib/utils';
 
 interface PricingCardProps {
   plan: Plan;
+  onChoosePlan: () => void;
 }
 
-export default function PricingCard({ plan }: PricingCardProps) {
+export default function PricingCard({ plan, onChoosePlan }: PricingCardProps) {
   return (
     <Card
       className={cn(
@@ -31,7 +32,7 @@ export default function PricingCard({ plan }: PricingCardProps) {
       )}
       <CardHeader className="items-center text-center">
         {plan.icon}
-        <CardTitle className="text-2xl font-headline mt-4">
+        <CardTitle className="text-2xl font-headline mt-4 capitalize">
           {plan.name}
         </CardTitle>
         <div className="flex items-baseline gap-1">
@@ -51,7 +52,7 @@ export default function PricingCard({ plan }: PricingCardProps) {
         </ul>
       </CardContent>
       <CardFooter>
-        <Button className="w-full group">
+        <Button className="w-full group" onClick={onChoosePlan}>
           {plan.cta}
           <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
         </Button>
