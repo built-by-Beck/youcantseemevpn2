@@ -8,11 +8,11 @@ import type { Plan, PlanName } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useAuthModal } from '@/components/auth/auth-modal';
-// import { createCheckoutSession } from '@/ai/flows/create-checkout-session';
+import { createCheckoutSession } from '@/ai/flows/create-checkout-session';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-const plans: Omit<Plan, 'name'>[] = [
+const plans: Omit<Plan, 'name' | 'id'>[] = [
   {
     tier: 'basic',
     price: '$5.99',
@@ -73,28 +73,26 @@ export default function Home() {
 
     if (plan === 'none') return;
     setLoadingPlan(plan);
-    alert(`Plan selection for "${plan}" is temporarily disabled.`);
-    setLoadingPlan(null);
-
-    // try {
-    //   const { url } = await createCheckoutSession({ plan, userId: user.uid });
-    //   if (url) {
-    //     router.push(url);
-    //   } else {
-    //     throw new Error('Could not create a checkout session URL.');
-    //   }
-    // } catch (error: any) {
-    //   console.error('Checkout error:', error);
-    //   toast({
-    //     title: 'Error',
-    //     description:
-    //       error.message ||
-    //       'Could not create a checkout session. Please try again later.',
-    //     variant: 'destructive',
-    //   });
-    // } finally {
-    //   setLoadingPlan(null);
-    // }
+    
+    try {
+      const { url } = await createCheckoutSession({ plan, userId: user.uid });
+      if (url) {
+        router.push(url);
+      } else {
+        throw new Error('Could not create a checkout session URL.');
+      }
+    } catch (error: any) {
+      console.error('Checkout error:', error);
+      toast({
+        title: 'Error',
+        description:
+          error.message ||
+          'Could not create a checkout session. Please try again later.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoadingPlan(null);
+    }
   };
 
   return (
@@ -116,7 +114,7 @@ export default function Home() {
         {plans.map((plan) => (
           <PricingCard
             key={plan.tier}
-            plan={{ ...plan, name: plan.tier }}
+            plan={{ ...plan, name: plan.tier, id: plan.tier }}
             onChoosePlan={() => handleChoosePlan(plan.tier)}
             isLoading={loadingPlan === plan.tier}
           />

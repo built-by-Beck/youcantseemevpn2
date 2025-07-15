@@ -17,7 +17,7 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
 
 interface PricingCardProps {
   plan: Plan;
-  onChoosePlan: (planId: string) => Promise<void>; // Modified to accept planId and return a Promise
+  onChoosePlan: (planId: string) => Promise<void>; 
   isLoading?: boolean;
 }
 
@@ -62,7 +62,7 @@ export default function PricingCard({
       <CardFooter>
         <Button
           className="w-full group"
-          onClick={() => onChoosePlan(plan.id)} // Pass the plan ID to onChoosePlan
+          onClick={() => onChoosePlan(plan.id)}
           disabled={isLoading}
         >
           {isLoading ? (
