@@ -24,6 +24,7 @@ import {
   SignalLow,
   SignalMedium,
   ShieldAlert,
+  Copy,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '../ui/badge';
@@ -32,6 +33,7 @@ import { useUserData } from '@/hooks/use-user-data';
 import { doc, updateDoc } from 'firebase/firestore';
 import { firestore } from '@/lib/firebase';
 import { useAuth } from '@/context/AuthContext';
+import { useState, useEffect } from 'react';
 
 const serverData: ServerData = {
   US: [
@@ -94,6 +96,20 @@ export default function DashboardClient() {
   const { user } = useAuth();
   const { userData, setUserData } = useUserData();
   const { toast } = useToast();
+  const [webhookUrl, setWebhookUrl] = useState('');
+
+  useEffect(() => {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+    setWebhookUrl(`${baseUrl}/api/stripe-webhook`);
+  }, []);
+
+  const handleCopyToClipboard = () => {
+    navigator.clipboard.writeText(webhookUrl);
+    toast({
+      title: 'Copied!',
+      description: 'The webhook URL has been copied to your clipboard.',
+    });
+  };
 
   const handleDownload = (serverName: string) => {
     toast({
@@ -107,7 +123,9 @@ export default function DashboardClient() {
     try {
       const userRef = doc(firestore, 'users', user.uid);
       await updateDoc(userRef, { membershipTier: newPlan });
-      setUserData({ ...userData, membershipTier: newPlan });
+      if (userData) {
+        setUserData({ ...userData, membershipTier: newPlan });
+      }
       toast({
         title: 'Plan Simulation Updated',
         description: `Your plan has been set to ${newPlan}.`,
@@ -140,9 +158,14 @@ export default function DashboardClient() {
               <Label htmlFor="plan-switcher">Simulate Plan</Label>
               <Select
                 value={currentPlan}
-                onValueChange={(value) => handleSimulatePlanChange(value as PlanName)}
+                onValueChange={(value) =>
+                  handleSimulatePlanChange(value as PlanName)
+                }
               >
-                <SelectTrigger id="plan-switcher" className="w-full sm:w-[200px]">
+                <SelectTrigger
+                  id="plan-switcher"
+                  className="w-full sm:w-[200px]"
+                >
                   <SelectValue placeholder="Select a plan" />
                 </SelectTrigger>
                 <SelectContent>
@@ -162,7 +185,7 @@ export default function DashboardClient() {
           </div>
         </CardContent>
       </Card>
-      
+
       {currentPlan === 'none' ? (
         <NoPlanState />
       ) : (
@@ -218,6 +241,26 @@ export default function DashboardClient() {
           ))}
         </Tabs>
       )}
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>Developer Info</CardTitle>
+          <CardDescription>
+            Use this information to configure your Stripe webhook.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between p-3 bg-muted rounded-md">
+            <code className="text-sm text-muted-foreground break-all">
+              {webhookUrl}
+            </code>
+            <Button variant="ghost" size="icon" onClick={handleCopyToClipboard}>
+              <Copy className="h-4 w-4" />
+              <span className="sr-only">Copy webhook URL</span>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
