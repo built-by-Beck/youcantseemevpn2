@@ -8,16 +8,21 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Check, ArrowRight } from 'lucide-react';
+import { Check, ArrowRight, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 interface PricingCardProps {
   plan: Plan;
   onChoosePlan: () => void;
+  isLoading?: boolean;
 }
 
-export default function PricingCard({ plan, onChoosePlan }: PricingCardProps) {
+export default function PricingCard({
+  plan,
+  onChoosePlan,
+  isLoading,
+}: PricingCardProps) {
   return (
     <Card
       className={cn(
@@ -52,9 +57,19 @@ export default function PricingCard({ plan, onChoosePlan }: PricingCardProps) {
         </ul>
       </CardContent>
       <CardFooter>
-        <Button className="w-full group" onClick={onChoosePlan}>
-          {plan.cta}
-          <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
+        <Button
+          className="w-full group"
+          onClick={onChoosePlan}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <>
+              {plan.cta}
+              <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
+            </>
+          )}
         </Button>
       </CardFooter>
     </Card>

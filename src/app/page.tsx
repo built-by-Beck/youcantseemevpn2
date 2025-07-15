@@ -3,13 +3,14 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import PricingCard from '@/components/pricing-card';
-import { ArrowRight, ShieldCheck, Star, Users } from 'lucide-react';
+import { ArrowRight, ShieldCheck, Star, Users, Loader2 } from 'lucide-react';
 import type { Plan, PlanName } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { doc, updateDoc } from 'firebase/firestore';
-import { firestore } from '@/lib/firebase';
 import { useAuthModal } from '@/components/auth/auth-modal';
+import { createCheckoutSession } from '@/ai/flows/create-checkout-session';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 const plans: Omit<Plan, 'name'>[] = [
   {
@@ -61,6 +62,8 @@ export default function Home() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { setOpen } = useAuthModal();
+  const [loadingPlan, setLoadingPlan] = useState<PlanName | null>(null);
+  const router = useRouter();
 
   const handleChoosePlan = async (plan: PlanName) => {
     if (!user) {
@@ -68,19 +71,27 @@ export default function Home() {
       return;
     }
 
+    if (plan === 'none') return;
+    setLoadingPlan(plan);
+
     try {
-      const userRef = doc(firestore, 'users', user.uid);
-      await updateDoc(userRef, { membershipTier: plan });
-      toast({
-        title: 'Plan Updated!',
-        description: `You are now on the ${plan} plan.`,
-      });
-    } catch (error) {
+      const { url } = await createCheckoutSession({ plan, userId: user.uid });
+      if (url) {
+        router.push(url);
+      } else {
+        throw new Error('Could not create a checkout session URL.');
+      }
+    } catch (error: any) {
+      console.error('Checkout error:', error);
       toast({
         title: 'Error',
-        description: 'Could not update your plan. Please try again.',
+        description:
+          error.message ||
+          'Could not create a checkout session. Please try again later.',
         variant: 'destructive',
       });
+    } finally {
+      setLoadingPlan(null);
     }
   };
 
@@ -105,6 +116,7 @@ export default function Home() {
             key={plan.tier}
             plan={{ ...plan, name: plan.tier }}
             onChoosePlan={() => handleChoosePlan(plan.tier)}
+            isLoading={loadingPlan === plan.tier}
           />
         ))}
       </div>
