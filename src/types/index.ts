@@ -1,4 +1,4 @@
-export type PlanName = 'basic' | 'pro' | 'family';
+export type PlanName = 'basic' | 'pro' | 'family' | 'none';
 
 export interface Plan {
   name: string;
