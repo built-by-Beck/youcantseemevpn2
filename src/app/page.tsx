@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -98,9 +99,6 @@ export default function Home() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-5rem)] p-4 md:p-8">
       <div className="text-center max-w-4xl mx-auto">
-        <div className="inline-block rounded-full bg-primary/10 px-4 py-2 text-sm font-semibold text-primary mb-4">
-          24-Hour Free Trial Available on All Plans
-        </div>
         <h1 className="text-4xl md:text-6xl font-bold font-headline tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
           You Can't See Me. But You Can See These Prices.
         </h1>
@@ -115,7 +113,7 @@ export default function Home() {
           <PricingCard
             key={plan.tier}
             plan={{ ...plan, name: plan.tier, id: plan.tier }}
-            onChoosePlan={() => handleChoosePlan(plan.tier)}
+            onChoosePlan={() => handleChoosePlan(plan.tier as PlanName)}
             isLoading={loadingPlan === plan.tier}
           />
         ))}
